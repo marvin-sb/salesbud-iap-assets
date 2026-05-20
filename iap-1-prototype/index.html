@@ -1,0 +1,1166 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Salesbud CRM Intel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0f1c;
+      --terminal: #050810;
+      --cyan: #06b6d4;
+      --text: #d1d5db;
+      --muted: #8b96a8;
+      --border: #4b5563;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --green: #22c55e;
+      --clip: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+    }
+
+    * {
+      box-sizing: border-box;
+      border-radius: 0 !important;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, sans-serif;
+    }
+
+    body {
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(6, 182, 212, 0.12), transparent 28rem),
+        radial-gradient(circle at 82% 24%, rgba(245, 158, 11, 0.08), transparent 24rem),
+        var(--bg);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 1;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(6, 182, 212, 0.05) 0 1px, transparent 1px 42px),
+        repeating-linear-gradient(90deg, rgba(6, 182, 212, 0.05) 0 1px, transparent 1px 42px);
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9), rgba(0,0,0,0.15));
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    a,
+    button {
+      color: inherit;
+    }
+
+    .app {
+      position: relative;
+      min-height: 100vh;
+    }
+
+    .screen {
+      display: none;
+      min-height: 100vh;
+      opacity: 0;
+      transition: opacity 300ms ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .screen.visible {
+      opacity: 1;
+    }
+
+    .container {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(75, 85, 99, 0.72);
+      background: rgba(5, 8, 16, 0.88);
+      backdrop-filter: blur(16px);
+    }
+
+    .header-inner {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      min-width: max-content;
+      text-decoration: none;
+    }
+
+    .brand-logo,
+    .company-mark {
+      width: 38px;
+      height: 38px;
+      object-fit: contain;
+      background: rgba(6, 182, 212, 0.09);
+      border: 1px solid rgba(6, 182, 212, 0.42);
+      clip-path: var(--clip);
+    }
+
+    .brand-title {
+      font-weight: 800;
+      letter-spacing: 0;
+      color: white;
+      font-size: 1.05rem;
+    }
+
+    .nav {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+      margin-right: 12px;
+    }
+
+    .nav button,
+    .ghost-btn {
+      min-height: 38px;
+      padding: 0 14px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      font-family: "Fira Code", monospace;
+      font-size: 0.73rem;
+      text-transform: uppercase;
+      clip-path: var(--clip);
+    }
+
+    .nav button:hover,
+    .ghost-btn:hover {
+      border-color: rgba(6, 182, 212, 0.58);
+      color: var(--cyan);
+      background: rgba(6, 182, 212, 0.08);
+    }
+
+    .user-zone {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(6, 182, 212, 0.55);
+      color: var(--cyan);
+      background: rgba(6, 182, 212, 0.08);
+      font-family: "Fira Code", monospace;
+      font-weight: 700;
+      clip-path: var(--clip);
+    }
+
+    .system-tag {
+      font-family: "Fira Code", monospace;
+      text-transform: uppercase;
+      color: var(--cyan);
+      letter-spacing: 0;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .card,
+    .action-card,
+    .stat,
+    .input-wrap,
+    .tag,
+    .badge,
+    .primary-btn,
+    .secondary-btn {
+      clip-path: var(--clip);
+    }
+
+    .card {
+      position: relative;
+      border: 1px solid rgba(75, 85, 99, 0.86);
+      background:
+        linear-gradient(135deg, rgba(6, 182, 212, 0.08), transparent 22rem),
+        var(--terminal);
+      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.4);
+    }
+
+    .card::before,
+    .action-card::before,
+    .stat::before,
+    .step::before,
+    .accent::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 12px;
+      width: 24px;
+      height: 3px;
+      background: var(--cyan);
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.8);
+    }
+
+    .primary-btn,
+    .secondary-btn {
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 0 22px;
+      border: 1px solid rgba(6, 182, 212, 0.86);
+      font-family: "Fira Code", monospace;
+      font-weight: 700;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .primary-btn {
+      background: var(--cyan);
+      color: #021018;
+      box-shadow: 0 0 34px rgba(6, 182, 212, 0.28);
+    }
+
+    .primary-btn:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    .secondary-btn {
+      background: rgba(6, 182, 212, 0.07);
+      color: var(--cyan);
+    }
+
+    .input-wrap {
+      display: flex;
+      align-items: center;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: rgba(3, 7, 18, 0.76);
+    }
+
+    .input-wrap:focus-within {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.18);
+    }
+
+    input {
+      width: 100%;
+      min-height: 52px;
+      border: 0;
+      outline: 0;
+      padding: 0 16px;
+      background: transparent;
+      color: white;
+    }
+
+    label {
+      display: block;
+      margin: 18px 0 8px;
+      color: var(--muted);
+      font-family: "Fira Code", monospace;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+    }
+
+    .login-stage {
+      min-height: calc(100vh - 72px);
+      display: grid;
+      place-items: center;
+      padding: 48px 0;
+    }
+
+    .login-card {
+      width: min(440px, 100%);
+      padding: 34px;
+      border-color: rgba(6, 182, 212, 0.44);
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      font-weight: 800;
+      color: white;
+      letter-spacing: 0;
+    }
+
+    .login-card h1 {
+      margin-top: 14px;
+      font-size: clamp(2rem, 7vw, 3rem);
+      line-height: 0.96;
+    }
+
+    .hint {
+      margin-top: 18px;
+      color: var(--amber);
+      font-family: "Fira Code", monospace;
+      font-size: 0.78rem;
+    }
+
+    .hero {
+      padding: 76px 0 34px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      margin-top: 14px;
+      font-size: clamp(3rem, 9vw, 6.8rem);
+      line-height: 0.9;
+    }
+
+    .hero p {
+      margin: 18px auto 0;
+      max-width: 620px;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.25rem);
+    }
+
+    .search-panel {
+      margin: 38px auto 0;
+      width: min(850px, 100%);
+      display: grid;
+      gap: 12px;
+    }
+
+    .search-row {
+      display: grid;
+      gap: 12px;
+    }
+
+    .example-tags,
+    .tech-tags,
+    .competitor-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .example-tags {
+      justify-content: center;
+      margin-top: 4px;
+    }
+
+    .tag,
+    .badge {
+      border: 1px solid rgba(6, 182, 212, 0.45);
+      background: rgba(6, 182, 212, 0.07);
+      color: var(--cyan);
+      font-family: "Fira Code", monospace;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      padding: 8px 11px;
+    }
+
+    .tag {
+      cursor: pointer;
+    }
+
+    .tag:hover {
+      border-color: var(--cyan);
+      background: rgba(6, 182, 212, 0.13);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      padding: 14px 0 64px;
+    }
+
+    .stat {
+      position: relative;
+      border: 1px solid rgba(75, 85, 99, 0.75);
+      background: rgba(5, 8, 16, 0.74);
+      padding: 18px;
+      text-align: center;
+      font-family: "Fira Code", monospace;
+    }
+
+    .stat strong {
+      color: var(--amber);
+      display: block;
+      font-size: 1.35rem;
+    }
+
+    .pipeline-wrap,
+    .dossier-wrap {
+      padding: 42px 0 72px;
+    }
+
+    .page-title {
+      margin-bottom: 24px;
+    }
+
+    .page-title h1 {
+      margin-top: 10px;
+      font-size: clamp(2rem, 6vw, 4.2rem);
+      line-height: 1;
+    }
+
+    .pipeline-card {
+      padding: 28px;
+      border-color: rgba(6, 182, 212, 0.42);
+    }
+
+    .global-progress {
+      height: 10px;
+      margin-bottom: 28px;
+      border: 1px solid rgba(6, 182, 212, 0.55);
+      background: rgba(6, 182, 212, 0.08);
+      clip-path: var(--clip);
+      overflow: hidden;
+    }
+
+    .global-progress span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--cyan), #67e8f9);
+    }
+
+    .pipeline-card.running .global-progress span {
+      animation: fillGlobal 4.5s linear forwards;
+    }
+
+    .steps {
+      display: grid;
+      gap: 14px;
+    }
+
+    .step {
+      --delay: 0s;
+      position: relative;
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 14px;
+      align-items: center;
+      padding: 14px;
+      border: 1px solid rgba(75, 85, 99, 0.7);
+      background: rgba(10, 15, 28, 0.72);
+      clip-path: var(--clip);
+    }
+
+    .status {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(6, 182, 212, 0.5);
+      color: transparent;
+      font-family: "Fira Code", monospace;
+      clip-path: var(--clip);
+      position: relative;
+    }
+
+    .status::before {
+      content: "";
+      width: 13px;
+      height: 13px;
+      border: 2px solid rgba(6, 182, 212, 0.26);
+      border-top-color: var(--cyan);
+      animation: spin 0.7s linear infinite;
+    }
+
+    .pipeline-card.running .step .status {
+      animation: statusDone 0.01s linear forwards;
+      animation-delay: var(--delay);
+    }
+
+    .pipeline-card.running .step .status::before {
+      animation: spin 0.7s linear infinite, hideSpinner 0.01s linear forwards;
+      animation-delay: 0s, var(--delay);
+    }
+
+    .step-main {
+      min-width: 0;
+    }
+
+    .step-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--text);
+      font-family: "Fira Code", monospace;
+      font-size: 0.78rem;
+      line-height: 1.5;
+    }
+
+    .step-label span:last-child {
+      color: var(--muted);
+      text-align: right;
+    }
+
+    .step-progress {
+      height: 6px;
+      margin-top: 10px;
+      background: rgba(75, 85, 99, 0.45);
+      overflow: hidden;
+      clip-path: var(--clip);
+    }
+
+    .step-progress span {
+      display: block;
+      width: 0;
+      height: 100%;
+      background: var(--cyan);
+      box-shadow: 0 0 16px rgba(6, 182, 212, 0.7);
+    }
+
+    .pipeline-card.running .step .step-progress span {
+      animation: fillStep 0.65s ease forwards;
+      animation-delay: calc(var(--delay) - 0.55s);
+    }
+
+    .pipeline-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 24px;
+      min-height: 48px;
+    }
+
+    #viewDossierBtn {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: 240ms ease;
+    }
+
+    #viewDossierBtn.ready {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .breadcrumb {
+      margin-bottom: 18px;
+      color: var(--cyan);
+      font-family: "Fira Code", monospace;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+    }
+
+    .company-hero {
+      display: grid;
+      grid-template-columns: 68px 1fr;
+      gap: 18px;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 22px;
+      border-color: rgba(6, 182, 212, 0.42);
+    }
+
+    .company-mark {
+      width: 64px;
+      height: 64px;
+      display: grid;
+      place-items: center;
+      object-fit: contain;
+      color: var(--cyan);
+      font-family: "Fira Code", monospace;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .company-hero h1 {
+      font-size: clamp(1.7rem, 5vw, 3.6rem);
+      line-height: 1;
+    }
+
+    .company-meta {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--muted);
+      font-family: "Fira Code", monospace;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+    }
+
+    .badge.green {
+      color: var(--green);
+      border-color: rgba(34, 197, 94, 0.55);
+      background: rgba(34, 197, 94, 0.08);
+    }
+
+    .badge.red {
+      color: var(--red);
+      border-color: rgba(239, 68, 68, 0.58);
+      background: rgba(239, 68, 68, 0.08);
+    }
+
+    .dossier-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .info-card {
+      padding: 22px;
+    }
+
+    .info-card h2,
+    .automation-card h2 {
+      margin-bottom: 18px;
+      color: var(--cyan);
+      font-family: "Fira Code", monospace;
+      font-size: 0.87rem;
+      text-transform: uppercase;
+    }
+
+    .data-list {
+      display: grid;
+      gap: 12px;
+      margin: 0;
+    }
+
+    .data-row {
+      display: grid;
+      grid-template-columns: minmax(110px, 0.7fr) 1fr;
+      gap: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(75, 85, 99, 0.38);
+    }
+
+    .data-row dt {
+      color: var(--muted);
+      font-family: "Fira Code", monospace;
+      font-size: 0.71rem;
+      text-transform: uppercase;
+    }
+
+    .data-row dd {
+      margin: 0;
+      color: white;
+      font-weight: 600;
+    }
+
+    .metric {
+      color: var(--amber) !important;
+      font-family: "Fira Code", monospace;
+    }
+
+    .linkish {
+      color: var(--cyan) !important;
+      font-family: "Fira Code", monospace;
+    }
+
+    .automation-card {
+      margin-top: 16px;
+      padding: 24px;
+      border-color: rgba(6, 182, 212, 0.74);
+      background:
+        linear-gradient(135deg, rgba(6, 182, 212, 0.13), transparent 24rem),
+        var(--terminal);
+    }
+
+    .automation-head {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .automation-head h3 {
+      font-size: clamp(1.4rem, 4vw, 2.3rem);
+    }
+
+    .automation-head p,
+    .note {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .actions-grid {
+      display: grid;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .action-card {
+      position: relative;
+      min-height: 112px;
+      padding: 18px;
+      border: 1px solid rgba(75, 85, 99, 0.72);
+      background: rgba(10, 15, 28, 0.76);
+    }
+
+    .action-status {
+      display: inline-flex;
+      margin-bottom: 14px;
+      color: var(--green);
+      font-family: "Fira Code", monospace;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+    }
+
+    .action-title {
+      color: white;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .action-desc {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .action-card.executing .action-status {
+      color: var(--amber);
+    }
+
+    .action-card.done .action-status {
+      color: var(--cyan);
+    }
+
+    .automation-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .automation-feedback {
+      min-height: 24px;
+      color: var(--amber);
+      font-family: "Fira Code", monospace;
+      font-size: 0.78rem;
+    }
+
+    .dossier-footer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    @keyframes fillGlobal {
+      to { width: 100%; }
+    }
+
+    @keyframes fillStep {
+      to { width: 100%; }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes hideSpinner {
+      to { opacity: 0; }
+    }
+
+    @keyframes statusDone {
+      to {
+        color: var(--cyan);
+        border-color: var(--cyan);
+        background: rgba(6, 182, 212, 0.12);
+      }
+    }
+
+    .pipeline-card.running .step .status::after {
+      content: "[✓]";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      opacity: 0;
+      animation: revealCheck 0.01s linear forwards;
+      animation-delay: var(--delay);
+    }
+
+    @keyframes revealCheck {
+      to { opacity: 1; }
+    }
+
+    @media (min-width: 680px) {
+      .nav {
+        display: flex;
+      }
+
+      .search-row {
+        grid-template-columns: 1fr auto;
+      }
+
+      .stats {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .actions-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (min-width: 900px) {
+      .dossier-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        width: min(100% - 22px, 1180px);
+      }
+
+      .header-inner {
+        min-height: 64px;
+      }
+
+      .ghost-btn {
+        display: none;
+      }
+
+      .login-card,
+      .pipeline-card,
+      .info-card,
+      .automation-card,
+      .company-hero {
+        padding: 18px;
+      }
+
+      .company-hero {
+        grid-template-columns: 1fr;
+      }
+
+      .step {
+        grid-template-columns: 1fr;
+      }
+
+      .step-label {
+        display: grid;
+      }
+
+      .data-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section id="screen-login" class="screen active visible">
+      <header class="header">
+        <div class="container header-inner">
+          <a class="brand" href="#" aria-label="SalesBud">
+            <img class="brand-logo" alt="SalesBud logo" src="data:image/avif;base64,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">
+            <span class="brand-title">SalesBud</span>
+          </a>
+        </div>
+      </header>
+      <main class="container login-stage">
+        <form class="card login-card" id="loginForm">
+          <div class="system-tag">IDENTITY.CHECKPOINT // AUTENTICAÇÃO</div>
+          <h1>Login SalesBud</h1>
+          <label for="email">Email</label>
+          <div class="input-wrap"><input id="email" type="email" value="demo@salesbud.com.br" autocomplete="email"></div>
+          <label for="password">Senha</label>
+          <div class="input-wrap"><input id="password" type="password" value="demo123" autocomplete="current-password"></div>
+          <button class="primary-btn" type="submit" style="width:100%; margin-top:22px;">ENTRAR</button>
+          <div class="hint">demo@salesbud.com.br / demo123</div>
+        </form>
+      </main>
+    </section>
+
+    <section id="screen-home" class="screen">
+      <header class="header app-header"></header>
+      <main class="container">
+        <div class="hero">
+          <div class="system-tag">CRM.INTEL // PESQUISA DE EMPRESA</div>
+          <h1>Salesbud CRM Intel</h1>
+          <p>Inteligência de mercado em segundos</p>
+          <div class="search-panel">
+            <div class="search-row">
+              <div class="input-wrap"><input id="companySearch" type="text" placeholder="Digite CNPJ, domínio ou nome da empresa" value="SalesBud Tecnologia"></div>
+              <button class="primary-btn" id="analyzeBtn" type="button">ANALISAR</button>
+            </div>
+            <div class="example-tags">
+              <button class="tag" type="button" data-value="42.318.949/0001-84">[CNPJ]</button>
+              <button class="tag" type="button" data-value="salesbud.com.br">[Domínio]</button>
+              <button class="tag" type="button" data-value="SalesBud Tecnologia">[Nome]</button>
+            </div>
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat"><strong>3</strong> empresas analisadas hoje</div>
+          <div class="stat"><strong>147ms</strong> tempo médio</div>
+          <div class="stat"><strong>98.2%</strong> precisão</div>
+        </div>
+      </main>
+    </section>
+
+    <section id="screen-pipeline" class="screen">
+      <header class="header app-header"></header>
+      <main class="container pipeline-wrap">
+        <div class="page-title">
+          <div class="system-tag">CRM.INTEL // PROCESSAMENTO</div>
+          <h1>Analisando empresa...</h1>
+          <p id="pipelineName" class="hint"></p>
+        </div>
+        <div class="card pipeline-card" id="pipelineCard">
+          <div class="global-progress"><span></span></div>
+          <div class="steps">
+            <div class="step" style="--delay: .8s"><div class="status"></div><div class="step-main"><div class="step-label"><span>[✓] Resolução de domínio</span><span>Tavily Search</span></div><div class="step-progress"><span></span></div></div></div>
+            <div class="step" style="--delay: 1.6s"><div class="status"></div><div class="step-main"><div class="step-label"><span>[✓] Dados cadastrais</span><span>ReceitaWS</span></div><div class="step-progress"><span></span></div></div></div>
+            <div class="step" style="--delay: 2.4s"><div class="status"></div><div class="step-main"><div class="step-label"><span>[✓] Enriquecimento</span><span>TheCompaniesAPI</span></div><div class="step-progress"><span></span></div></div></div>
+            <div class="step" style="--delay: 3.5s"><div class="status"></div><div class="step-main"><div class="step-label"><span>[✓] Pesquisa profunda</span><span>Tavily Deep Research</span></div><div class="step-progress"><span></span></div></div></div>
+            <div class="step" style="--delay: 4.5s"><div class="status"></div><div class="step-main"><div class="step-label"><span>[✓] Geração do dossiê</span><span>IA</span></div><div class="step-progress"><span></span></div></div></div>
+          </div>
+          <div class="pipeline-actions">
+            <button class="primary-btn" id="viewDossierBtn" type="button">VER DOSSIÊ</button>
+          </div>
+        </div>
+      </main>
+    </section>
+
+    <section id="screen-dossie" class="screen">
+      <header class="header app-header"></header>
+      <main class="container dossier-wrap">
+        <div class="breadcrumb">CRM.INTEL // DOSSIÊ // SALESBUD TECNOLOGIA</div>
+        <div class="card company-hero">
+          <div class="company-mark">SB</div>
+          <div>
+            <div class="system-tag">EMPRESA.ID // PERFIL VALIDADO</div>
+            <h1 id="dossierCompanyName">SalesBud Tecnologia</h1>
+            <div class="company-meta">
+              <span>42.318.949/0001-84</span>
+              <span class="badge green">ATIVA</span>
+              <span>SaaS B2B / CRM</span>
+              <span>São Paulo, SP</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="dossier-grid">
+          <article class="card info-card">
+            <h2>PERFIL.CORPORATIVO</h2>
+            <dl class="data-list">
+              <div class="data-row"><dt>Razão Social</dt><dd>SalesBud Tecnologia Ltda.</dd></div>
+              <div class="data-row"><dt>CNPJ</dt><dd>42.318.949/0001-84</dd></div>
+              <div class="data-row"><dt>Porte</dt><dd>Empresa de Pequeno Porte</dd></div>
+              <div class="data-row"><dt>Natureza</dt><dd>Sociedade Empresária Limitada</dd></div>
+              <div class="data-row"><dt>Abertura</dt><dd>18/06/2021</dd></div>
+              <div class="data-row"><dt>Situação</dt><dd><span class="badge green">ATIVA</span></dd></div>
+            </dl>
+          </article>
+
+          <article class="card info-card">
+            <h2>DADOS.FINANCEIROS</h2>
+            <dl class="data-list">
+              <div class="data-row"><dt>Receita estimada</dt><dd class="metric">R$ 4.8M ARR</dd></div>
+              <div class="data-row"><dt>Funcionários</dt><dd class="metric">38-52</dd></div>
+              <div class="data-row"><dt>Capital Social</dt><dd>R$ 250.000,00</dd></div>
+              <div class="data-row"><dt>Clientes</dt><dd>300+ empresas</dd></div>
+              <div class="data-row"><dt>Crescimento YoY</dt><dd class="metric">+72%</dd></div>
+            </dl>
+          </article>
+
+          <article class="card info-card">
+            <h2>TECNOLOGIAS</h2>
+            <div class="tech-tags">
+              <button class="tag" type="button">Next.js</button>
+              <button class="tag" type="button">TypeScript</button>
+              <button class="tag" type="button">Python</button>
+              <button class="tag" type="button">AWS</button>
+              <button class="tag" type="button">OpenAI</button>
+              <button class="tag" type="button">Supabase</button>
+              <button class="tag" type="button">Vercel</button>
+              <button class="tag" type="button">PostgreSQL</button>
+            </div>
+            <dl class="data-list" style="margin-top:18px;">
+              <div class="data-row"><dt>Site</dt><dd class="linkish">salesbud.com.br</dd></div>
+              <div class="data-row"><dt>LinkedIn</dt><dd class="linkish">/company/salesbud</dd></div>
+            </dl>
+          </article>
+
+          <article class="card info-card">
+            <h2>INTEL.COMPETITIVA</h2>
+            <dl class="data-list">
+              <div class="data-row"><dt>Segmento</dt><dd>Automação de CRM com IA</dd></div>
+              <div class="data-row"><dt>Concorrentes</dt><dd><span class="competitor-tags"><span class="badge red">Gong</span><span class="badge red">Fireflies</span><span class="badge red">HubSpot AI</span></span></dd></div>
+              <div class="data-row"><dt>Posicionamento</dt><dd>Copiloto operacional para times comerciais LATAM</dd></div>
+              <div class="data-row"><dt>Diferencial</dt><dd>Captura multicanal + escrita automática no CRM</dd></div>
+              <div class="data-row"><dt>Score mercado</dt><dd class="metric">87/100</dd></div>
+            </dl>
+          </article>
+        </div>
+
+        <section class="card automation-card">
+          <h2>PIPELINE.DE.AUTOMAÇÃO // Composio</h2>
+          <div class="automation-head">
+            <h3>Integração CRM Simulada</h3>
+            <p>Dados do dossiê prontos para inserção automática no CRM</p>
+          </div>
+          <div class="actions-grid" id="automationActions">
+            <div class="action-card"><span class="action-status">PRONTO</span><div class="action-title">→ Pipedrive</div><div class="action-desc">Criar lead com dados do dossiê</div></div>
+            <div class="action-card"><span class="action-status">PRONTO</span><div class="action-title">→ HubSpot</div><div class="action-desc">Enriquecer contato existente</div></div>
+            <div class="action-card"><span class="action-status">PRONTO</span><div class="action-title">→ Salesforce</div><div class="action-desc">Criar oportunidade qualificada</div></div>
+          </div>
+          <div class="automation-controls">
+            <button class="primary-btn" id="runAutomationBtn" type="button">EXECUTAR AUTOMAÇÃO</button>
+            <div class="automation-feedback" id="automationFeedback"></div>
+          </div>
+          <p class="note" style="margin-top:16px;">Powered by Composio — integração simulada para demonstração</p>
+        </section>
+
+        <div class="dossier-footer">
+          <button class="secondary-btn" id="newSearchBtn" type="button">NOVA PESQUISA</button>
+          <button class="secondary-btn" id="exportBtn" type="button">EXPORTAR PDF</button>
+        </div>
+      </main>
+    </section>
+  </div>
+
+  <script>
+    const logoSrc = document.querySelector(".brand-logo").src;
+    const headers = document.querySelectorAll(".app-header");
+    const state = { query: "SalesBud Tecnologia", pipelineTimer: null, autoTimer: null };
+
+    headers.forEach((header) => {
+      header.innerHTML = `
+        <div class="container header-inner">
+          <a class="brand" href="#" data-screen="screen-home" aria-label="SalesBud">
+            <img class="brand-logo" alt="SalesBud logo" src="${logoSrc}">
+            <span class="brand-title">SalesBud</span>
+          </a>
+          <nav class="nav" aria-label="Principal">
+            <button type="button" data-screen="screen-home">CRM Intel</button>
+            <button type="button">Histórico</button>
+            <button type="button">Configurações</button>
+          </nav>
+          <div class="user-zone">
+            <div class="avatar">SB</div>
+            <button class="ghost-btn" type="button" data-screen="screen-login">Logout</button>
+          </div>
+        </div>
+      `;
+    });
+
+    function showScreen(id) {
+      clearTimeout(state.pipelineTimer);
+      clearTimeout(state.autoTimer);
+      document.querySelectorAll(".screen").forEach((screen) => {
+        screen.classList.remove("visible");
+        setTimeout(() => {
+          if (!screen.classList.contains("visible")) screen.classList.remove("active");
+        }, 300);
+      });
+      const next = document.getElementById(id);
+      next.classList.add("active");
+      requestAnimationFrame(() => next.classList.add("visible"));
+      if (id === "screen-pipeline") startPipeline();
+      if (id === "screen-dossie") updateDossier();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function startAnalysis() {
+      const input = document.getElementById("companySearch");
+      state.query = (input.value || "SalesBud Tecnologia").trim();
+      showScreen("screen-pipeline");
+    }
+
+    function startPipeline() {
+      const card = document.getElementById("pipelineCard");
+      const button = document.getElementById("viewDossierBtn");
+      document.getElementById("pipelineName").textContent = state.query;
+      card.classList.remove("running");
+      button.classList.remove("ready");
+      void card.offsetWidth;
+      card.classList.add("running");
+      state.pipelineTimer = setTimeout(() => button.classList.add("ready"), 4550);
+      state.autoTimer = setTimeout(() => showScreen("screen-dossie"), 5500);
+    }
+
+    function updateDossier() {
+      document.getElementById("dossierCompanyName").textContent = state.query;
+      resetAutomation();
+    }
+
+    function resetAutomation() {
+      document.querySelectorAll("#automationActions .action-card").forEach((card) => {
+        card.classList.remove("executing", "done");
+        card.querySelector(".action-status").textContent = "PRONTO";
+      });
+      document.getElementById("automationFeedback").textContent = "";
+      document.getElementById("runAutomationBtn").disabled = false;
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      showScreen("screen-home");
+    });
+
+    document.getElementById("analyzeBtn").addEventListener("click", startAnalysis);
+    document.getElementById("companySearch").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") startAnalysis();
+    });
+
+    document.querySelectorAll("[data-value]").forEach((tag) => {
+      tag.addEventListener("click", () => {
+        document.getElementById("companySearch").value = tag.dataset.value;
+        document.getElementById("companySearch").focus();
+      });
+    });
+
+    document.body.addEventListener("click", (event) => {
+      const target = event.target.closest("[data-screen]");
+      if (!target) return;
+      event.preventDefault();
+      showScreen(target.dataset.screen);
+    });
+
+    document.getElementById("viewDossierBtn").addEventListener("click", () => showScreen("screen-dossie"));
+    document.getElementById("newSearchBtn").addEventListener("click", () => showScreen("screen-home"));
+    document.getElementById("exportBtn").addEventListener("click", () => {
+      document.getElementById("exportBtn").textContent = "PDF GERADO";
+      setTimeout(() => { document.getElementById("exportBtn").textContent = "EXPORTAR PDF"; }, 1400);
+    });
+
+    document.getElementById("runAutomationBtn").addEventListener("click", () => {
+      const cards = [...document.querySelectorAll("#automationActions .action-card")];
+      const feedback = document.getElementById("automationFeedback");
+      document.getElementById("runAutomationBtn").disabled = true;
+      feedback.textContent = "EXECUTANDO // COMPOSIO";
+      cards.forEach((card, index) => {
+        setTimeout(() => {
+          card.classList.add("executing");
+          card.querySelector(".action-status").textContent = "SINCRONIZANDO";
+        }, index * 420);
+        setTimeout(() => {
+          card.classList.remove("executing");
+          card.classList.add("done");
+          card.querySelector(".action-status").textContent = "✓ CONCLUÍDO";
+          if (index === cards.length - 1) feedback.textContent = "AUTOMAÇÃO CONCLUÍDA // 3 AÇÕES";
+        }, 900 + index * 520);
+      });
+    });
+  </script>
+</body>
+</html>
